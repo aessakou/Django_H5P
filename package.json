@@ -1,0 +1,15 @@
+{
+  "name": "django_h5p",
+  "version": "1.0.0",
+  "description": "H5P Management System for Django",
+  "dependencies": {
+    "h5p-standalone": "^3.8.0"
+  },
+  "scripts": {
+    "install-h5p": "npm install h5p-standalone",
+    "build": "echo 'Build process for H5P integration'"
+  },
+  "keywords": ["h5p", "django", "education", "interactive-content"],
+  "author": "Author",
+  "license": "MIT"
+}

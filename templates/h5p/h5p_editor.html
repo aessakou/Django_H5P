@@ -1,0 +1,22 @@
+<h1>{% if content %}Edit{% else %}Create{% endif %} H5P Content</h1>
+
+<form method="post">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <button type="submit">Save Content</button>
+</form>
+
+<!-- H5P editor integration -->
+<div id="h5p-editor"></div>
+<script>
+  // Initialize H5P editor
+  const h5pEditor = new H5PEditor({
+      selector: '#h5p-editor',
+      content: {{ content.json_content|safe if content else "{}" }}
+  });
+
+  // Example: Real-time preview
+  h5pEditor.on('change', function(updatedContent) {
+      console.log("Content updated:", updatedContent);
+  });
+</script>

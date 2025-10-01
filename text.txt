@@ -1,0 +1,31 @@
+H5P_Management/
+├── H5P_Management/
+│ ├── __init__.py
+│ ├── settings.py
+│ ├── urls.py
+│ └── wsgi.py
+├── accounts/
+│ ├── models.py
+│ ├── views.py
+│ ├── forms.py
+│ └── urls.py
+├── h5p/
+│ ├── models.py
+│ ├── views.py
+│ ├── forms.py
+│ ├── urls.py
+│ ├── utils.py
+│ └── management/
+│ └── commands/
+├── templates/
+│ ├── accounts/
+│ └── h5p/
+├── static/
+│ ├── h5p/
+│ │ ├── css/
+│ │ ├── js/
+│ │ └── images/
+├── media/
+│ ├── h5p/
+│ └── branding/
+└── manage.py
