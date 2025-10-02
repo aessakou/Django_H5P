@@ -5,6 +5,7 @@
     max-width: 100%;
     margin: 0 auto;
   }
+
   .content-info {
     background: #f8f9fa;
     padding: 1rem;
@@ -20,7 +21,7 @@
         <h1 class="h3 mb-2">{{ content.title }}</h1>
         <p class="text-muted mb-1">
           <i class="fas fa-user me-1"></i> Created by: {{
-          content.author.get_full_name|default:content.author.username }}
+          content.created_by.get_full_name|default:content.created_by.username }}
         </p>
         <p class="text-muted mb-0">
           <i class="fas fa-calendar me-1"></i> Created: {{
@@ -37,12 +38,21 @@
 <script>
   document.addEventListener("DOMContentLoaded", function () {
     const { H5P } = H5PStandalone;
+
+    // Build base directories expected by H5PStandalone (it appends filenames itself)
+    const h5pJsonUrl = '{% url "h5p:content_file" content.id "h5p.json" %}';
+    const contentJsonUrl = '{% url "h5p:content_file" content.id "content/content.json" %}';
+
+    const h5pJsonBase = h5pJsonUrl.replace(/\/?h5p\.json$/, "");
+    const contentJsonBase = contentJsonUrl.replace(/\/?content\/content\.json$/, "/content");
+    const librariesBase = '{% static "h5p/libraries" %}';
+
     new H5P(document.getElementById("h5p-container-{{ content.id }}"), {
-      h5pJsonPath: '{% url "h5p:content_json" content.id %}',
-      frameJs: '{% static "h5p/js/frame.bundle.js" %}',
+      h5pJsonPath: h5pJsonBase,
+      frameJs: '{% static "h5p/js/main.bundle.js" %}',
       frameCss: '{% static "h5p/css/h5p.css" %}',
-      librariesPath: '{% static "h5p/libraries/" %}',
-      contentJsonPath: '{% url "h5p:content_json" content.id %}',
+      librariesPath: librariesBase,
+      contentJsonPath: contentJsonBase,
       customization: {
         save: true,
         saveFreq: 30,

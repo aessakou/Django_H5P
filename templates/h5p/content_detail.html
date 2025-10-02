@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block title %}{{ content.title }} - H5P{% endblock %}
+
+{% block content %}
+<h1 class="mt-4">{{ content.title }}</h1>
+<hr />
+
+<div class="mb-4">
+  <strong>Type:</strong> {{ content.content_type }} <br />
+  <strong>Created at:</strong> {{ content.created_at|date:"Y-m-d H:i" }}
+</div>
+
+<div class="card shadow-sm p-4">
+  <!-- H5P Player -->
+  <div id="h5p-container">
+    {{ h5p_content|safe }}
+  </div>
+</div>
+
+<a href="{% url 'h5p:content_list' %}" class="btn btn-secondary mt-3">Back to list</a>
+{% endblock %}

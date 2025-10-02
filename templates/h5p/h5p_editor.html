@@ -12,7 +12,7 @@
   // Initialize H5P editor
   const h5pEditor = new H5PEditor({
       selector: '#h5p-editor',
-      content: {{ content.json_content|safe if content else "{}" }}
+      content: {{ content.json_content|default:'{}' }}
   });
 
   // Example: Real-time preview

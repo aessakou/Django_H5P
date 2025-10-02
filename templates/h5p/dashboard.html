@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - H5P Management{% endblock %}
+
+{% block content %}
+<h1 class="mt-4">Dashboard</h1>
+<hr />
+
+{% if user.is_staff %}
+  <h3>Admin Dashboard</h3>
+  <ul>
+    <li>System-wide H5P statistics</li>
+    <li>Recent content overview</li>
+    <li>User management tools</li>
+    <li>Library management access</li>
+  </ul>
+{% else %}
+  <h3>Teacher Dashboard</h3>
+  <ul>
+    <li>Personal content statistics</li>
+    <li>Quick content creation tools</li>
+    <li>Content library access</li>
+    <li>Progress tracking</li>
+  </ul>
+{% endif %}
+{% endblock %}

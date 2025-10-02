@@ -17,15 +17,17 @@ Including another URLconf
 
 from django.contrib import admin
 from django.urls import path, include
+from django.views.generic import RedirectView
 from django.conf import settings
 from django.conf.urls.static import static
 
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('accounts/', include('accounts.urls')),
-    path('h5p/', include('h5p.urls')),
-    path('', include('accounts.urls')), # Default to accounts
+    path('accounts/', include(('accounts.urls', 'accounts'), namespace='accounts')),
+    path('h5p/', include(('h5p.urls', 'h5p'), namespace='h5p')),
+    # Default root: redirect to h5p dashboard (avoid duplicating namespace)
+    path('', RedirectView.as_view(pattern_name='h5p:dashboard', permanent=False)),
 ]
 
 # Serve media files in development

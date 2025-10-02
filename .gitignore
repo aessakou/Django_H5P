@@ -2,3 +2,6 @@
 .env
 db.*
 node_modules
+static/h5p/libraries
+media/h5p
+staticfiles/h5p

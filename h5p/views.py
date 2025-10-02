@@ -1,16 +1,20 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse, HttpResponse
-from .models import H5PContent, H5PResult
-from .forms import H5PContentForm
-from django.shortcuts import render
 from django.contrib.auth.decorators import login_required, user_passes_test
-from .models import H5PContent, H5PResult, H5PLibrary
 from django.contrib.auth import get_user_model
-from django.shortcuts import render, get_object_or_404, redirect
-from django.contrib.auth.decorators import login_required
-from .forms import H5PContentForm
-from .models import H5PContent
+from django.http import JsonResponse, HttpResponse, FileResponse, Http404
+from django.utils.encoding import smart_str
+from django.views.decorators.http import require_http_methods
+from django.conf import settings
+from .models import H5PContent, H5PResult, H5PLibrary
+from .forms import H5PContentForm, H5PUploadForm
+from .utils import (
+    extract_h5p_archive,
+    load_h5p_json,
+    derive_library_from_h5p_json,
+    get_content_storage_dir,
+    safe_path_join,
+)
+import os
 
 @login_required
 def h5p_content_editor(request, pk=None):
@@ -183,3 +187,78 @@ def player_view(request, pk):
         return JsonResponse({"status": "success", "score": score})
 
     return render(request, "h5p/player.html", {"content": content})
+
+
+# ---------------------------
+# 4. Upload .h5p Package
+# ---------------------------
+
+@login_required
+@require_http_methods(["GET", "POST"])
+def upload_h5p_view(request):
+    """Upload a .h5p file, extract, store metadata, and create H5PContent."""
+    if request.method == "POST":
+        form = H5PUploadForm(request.POST, request.FILES)
+        if form.is_valid():
+            uploaded_file = form.cleaned_data["file"]
+            file_bytes = uploaded_file.read()
+
+            # Ensure a placeholder library exists to satisfy FK constraint
+            placeholder_library, _ = H5PLibrary.objects.get_or_create(
+                name="Temporary",
+                version_major=0,
+                version_minor=0,
+                version_patch=0,
+                defaults={"runnable": False},
+            )
+
+            # Create a temporary content to get an ID for storage
+            temp_content = H5PContent.objects.create(
+                title=uploaded_file.name,
+                library=placeholder_library,
+                json_content={},
+                created_by=request.user,
+            )
+
+            content_dir = get_content_storage_dir(temp_content.id)
+            extract_h5p_archive(file_bytes, content_dir)
+            h5p_json = load_h5p_json(content_dir)
+            name, maj, mino, pat = derive_library_from_h5p_json(h5p_json)
+
+            # Ensure library exists/created
+            library, _ = H5PLibrary.objects.get_or_create(
+                name=name,
+                version_major=maj,
+                version_minor=mino,
+                version_patch=pat,
+                defaults={"runnable": True},
+            )
+
+            temp_content.title = h5p_json.get("title") or temp_content.title
+            temp_content.library = library
+            temp_content.json_content = h5p_json
+            temp_content.save()
+
+            return redirect("h5p:h5p_player", pk=temp_content.pk)
+    else:
+        form = H5PUploadForm()
+
+    return render(request, "h5p/upload.html", {"form": form})
+
+
+# ---------------------------
+# 5. Serve Extracted Content Files
+# ---------------------------
+
+@login_required
+def content_file_view(request, pk, path):
+    """Serve files from extracted H5P content directory securely."""
+    content = get_object_or_404(H5PContent, pk=pk)
+    root_dir = get_content_storage_dir(content.id)
+    try:
+        full_path = safe_path_join(root_dir, path)
+    except ValueError:
+        raise Http404
+    if not os.path.exists(full_path) or not os.path.isfile(full_path):
+        raise Http404
+    return FileResponse(open(full_path, "rb"))

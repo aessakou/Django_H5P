@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block title %}Upload H5P{% endblock %}
+{% block content %}
+<div class="container py-4">
+	<h1 class="h4 mb-3">Upload .h5p Package</h1>
+	<form method="post" enctype="multipart/form-data" class="card p-3">
+		{% csrf_token %}
+		{{ form.as_p }}
+		<button type="submit" class="btn btn-primary">Upload</button>
+	</form>
+	<div class="mt-3">
+		<a href="{% url 'h5p:content_list' %}">&larr; Back to Content</a>
+	</div>
+	<div class="mt-3 small text-muted">
+		Only .h5p zip archives are supported.
+	</div>
+
+	{% if form.errors %}
+	<div class="alert alert-danger mt-3">Please correct the errors above.</div>
+	{% endif %}
+</div>
+{% endblock %}
